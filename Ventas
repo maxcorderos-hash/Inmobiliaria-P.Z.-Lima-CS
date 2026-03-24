@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Inmobiliario Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1a2a44;
+            --accent: #d4af37;
+            --bg-light: #f4f7f6;
+            --white: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-light);
+            margin: 0;
+            color: var(--text);
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- Catálogo --- */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        #lista-inmuebles {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .propiedad-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .propiedad-card:hover { transform: translateY(-10px); }
+
+        .img-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+
+        .info { padding: 1.5rem; }
+        .precio { color: var(--accent); font-size: 1.5rem; font-weight: bold; }
+
+        /* --- Formulario --- */
+        #contacto-inmueble {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin-left: auto; margin-right: auto;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        input, textarea {
+            width: 100%; padding: 0.8rem;
+            border: 1px solid #ddd; border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        button {
+            width: 100%; padding: 1rem;
+            background: var(--primary); color: white;
+            border: none; border-radius: 8px; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
+        }
+
+        button:hover { background: var(--accent); }
+
+        /* --- WhatsApp --- */
+        .whatsapp-float {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #25d366; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 100; transition: 0.3s;
+        }
+        .whatsapp-float:hover { transform: scale(1.1); }
+        .whatsapp-float img { width: 35px; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Inmobiliaria Costa Rica</h1>
+    <p>Encuentra el hogar de tus sueños</p>
+</header>
+
+<div class="container">
+    <div id="lista-inmuebles">
+        </div>
+
+    <section id="contacto-inmueble">
+        <h3>Consultar Propiedad</h3>
+        <form id="form-bienes-raices">
+            <input type="hidden" id="propiedad-id" name="propiedad_id" value="General">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" name="user_name" required>
+            </div>
+            <div class="form-group">
+                <label>WhatsApp</label>
+                <input type="tel" name="user_phone" required>
+            </div>
+            <div class="form-group">
+                <label>Mensaje</label>
+                <textarea name="message" rows="3"></textarea>
+            </div>
+            <button type="submit" id="btn-enviar">Enviar a Google Sheets</button>
+            <p id="respuesta-status" style="text-align:center; margin-top:10px;"></p>
+        </form>
+    </section>
+</div>
+
+<a href="https://wa.me/50688589812" class="whatsapp-float" target="_blank">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+</a>
+
+<script>
+    // 1. DATOS DE EJEMPLO
+    const propiedades = [
+        { id: "CASA-001", titulo: "Villa Vista al Mar", precio: 285000, ubicacion: "Osa" },
+        { id: "LOTE-002", titulo: "Lote Urbano Central", precio: 95000, ubicacion: "Pérez Zeledón" },
+        { id: "APTO-003", titulo: "Apto Moderno", precio: 150000, ubicacion: "San José" }
+    ];
+
+    // 2. RENDERIZAR PROPIEDADES
+    const contenedor = document.getElementById('lista-inmuebles');
+    
+    propiedades.forEach(p => {
+        contenedor.innerHTML += `
+            <div class="propiedad-card">
+                <div class="img-placeholder">Vista Previa 3D / Foto</div>
+                <div class="info">
+                    <h3>${p.titulo}</h3>
+                    <p class="precio">$${p.precio.toLocaleString()}</p>
+                    <p>Ubicación: ${p.ubicacion}</p>
+                    <button onclick="seleccionarPropiedad('${p.id}', '${p.titulo}')">Me interesa</button>
+                </div>
+            </div>
+        `;
+    });
+
+    // 3. LOGICA SELECCIÓN
+    function seleccionarPropiedad(id, titulo) {
+        document.getElementById('propiedad-id').value = id;
+        document.querySelector('#contacto-inmueble h3').innerText = "Consultar: " + titulo;
+        window.scrollTo({ top: document.getElementById('contacto-inmueble').offsetTop - 50, behavior: 'smooth' });
+    }
+
+    // 4. ENVÍO A GOOGLE SHEETS
+    const scriptURL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI'; // <--- PEGA TU URL AQUÍ
+    const form = document.getElementById('form-bienes-raices');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const status = document.getElementById('respuesta-status');
+        status.innerText = "Enviando...";
+
+        fetch(scriptURL, { 
+            method: 'POST', 
+            body: new FormData(form),
+            mode: 'no-cors' 
+        })
+        .then(() => {
+            status.innerHTML = "<span style='color:green'>¡Enviado con éxito a la hoja!</span>";
+            form.reset();
+        })
+        .catch(error => {
+            status.innerHTML = "<span style='color:red'>Error al enviar</span>";
+            console.error('Error!', error.message);
+        });
+    });
+</script>
+
+</body>
+</html>
